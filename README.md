@@ -1,4 +1,4 @@
-# Build a Personal Website with Jekyll
+# Establish a Personal Web Presence
 ## Jekyll
 Before we start run the follow one of the following guides to install the required dependencies for jekyll on your OS; [Ubuntu](https://jekyllrb.com/docs/installation/ubuntu/), [MacOS](https://jekyllrb.com/docs/installation/macos/), [Windows](https://jekyllrb.com/docs/installation/windows/), [Other Linux](https://jekyllrb.com/docs/installation/other-linux/). To simplfy a lot of the intial boilerplate/design I chose to clone a theme from [this collection of premade templates.](http://jekyllthemes.org/) Once you have a local copy you can build and view the website by first using the command `bundle install` which will download theme specific dependancies then using `bundle exec jekyll serve`. This creates a live version of the site generated from the assets in the folder and will respond to changes as you make them. Alternatively `bundel exec jekyll build` will produce html files in the `_site` folder that are a 'compiled' snapshot of the sites state at build time.
 
