@@ -1,1 +1,56 @@
-# personal_eb_presence_tutorial
+# Build a Personal Website with Jekyll
+## Jekyll
+Before we start run the follow one of the following guides to install the required dependencies for jekyll on your OS; [Ubuntu](https://jekyllrb.com/docs/installation/ubuntu/), [MacOS](https://jekyllrb.com/docs/installation/macos/), [Windows](https://jekyllrb.com/docs/installation/windows/), [Other Linux](https://jekyllrb.com/docs/installation/other-linux/). To simplfy a lot of the intial boilerplate/design I chose to clone a theme from [this collection of premade templates.](http://jekyllthemes.org/) Once you have a local copy you can build and view the website by first using the command `bundle install` which will download theme specific dependancies then using `bundle exec jekyll serve`. This creates a live version of the site generated from the assets in the folder and will respond to changes as you make them. Alternatively `bundel exec jekyll build` will produce html files in the `_site` folder that are a 'compiled' snapshot of the sites state at build time.
+
+### Customisation Options
+As a start open your selected theme's `_config.yml` file and begin adding your own details. This will end up containing all high level information about you and the website - social media links, title/taglines, url and different options the theme has built in. It is also where collections of post types are defined for content organisation. Navigating the the folder `_assets/img/favicons/` you can set your own icon to appear on a browsers tab when users open you page. Explore the `img` folder and you will likely find if there is a spot in your theme for a head shot you can upload your own here. The `_assets` folder is also where a themes CSS files will be present - allowing you to change the way the site is styled. `_layouts` contains the HTML that describe how each type of page on your site will be [laid out](https://jekyllrb.com/docs/layouts/). 
+
+### Add Some Content
+Once your site is customised to your liking the main folder you will be adding your [posts](https://jekyllrb.com/docs/posts/) to is `_posts`. These are written in markdown with YAML [front matter](https://jekyllrb.com/docs/front-matter/). The front matter might vary from theme to theme but in general will contain which layout to use for the post (which will control where and how the post will appear), a title for the post, published date, description, content tags and any additional thematic options such as if a comments section should be enabled. Here is the front matter of one of my posts for reference:
+```
+---
+layout: post
+title:  "[Report] Dimensionality Reduction"
+date:   2019-01-08
+excerpt: "Statistical methods for dimensionality reduction of feature spaces."
+tag:
+comments: false
+---
+```
+To avoid setting the same option on every post you can set defaults in the `_config.yml` file, more information [here](https://jekyllrb.com/docs/configuration/front-matter-defaults/)
+Jekyll supports github flavoured markdown that adds to existing markdown syntax. You might already be familiar with writing this for readme.md files or replies on github, but I have found [this site](https://guides.github.com/features/mastering-markdown/) to be a good general reference. Your theme might come with it already but I highly recommend [MathJax](https://sgeos.github.io/github/jekyll/2016/08/21/adding_mathjax_to_a_jekyll_github_pages_blog.html) to be added to your site. This will enable Latex syntax and rendering in posts.
+
+## Host on Github Pages
+As we have used a pre-made jekyll template to publish this to github pages we just have to create a new public repository called \<Your Github Username\>.github.io and push your jekyll site files to this repository. This should automatically build and publish your site to https://\<Your Github Username\>.github.io. You can confirm this by checking the settings tab on your respository - you should see under the GitHub Pages section a message with a green tick accompanied by text stating your site if published. 
+
+## Host on Linode Instance
+Although personally I use github pages as it is free I tested out hosting the website on a Linode cloud server. For $5 USD a month you can be provisioned a shared core on an AMD Epyc cpu with a 1GB of ram to host your website on. You can also use it host several different websites/services at once to showcase some of your work. Once you have signed up, go to the marketplace and provision a LEMP imaged node (This will have pre-configuration for acting as a webhost). You should be able to go to your nodes IP address and see its PHP configuration file displayed once it is running. As Jekyll builds us a static site we can host it by running: `bundle exec jekyll build` inside the folder containing the code for the site. This creates a `_site` folder that contains all the assets to be served. These need to be uploaded to the linode server in the folder `/var/www/html/`. Once these files are uploaded you should be able to see your website when you go to the IP address of your linode instance in a browser. This basic set up will still require you to manually build and upload changes to the linode box when you add new content. There are ways to improve this workflow, this user has written a script that [rebuilds and posts changes to the webserver automatically.](https://cjs77.github.io/jekyll/git/2015/05/21/automating-jekyll-site-updates/)
+
+## Host on Third Party Webhost
+This should work in a very similar way to hosting on Linode but with none of the serving setup. It will be different from site to site but all should allow you to upload static site assets into a folder to be served. So your workflow would be to build the jekyll page from assets with `bundle exec jekyll build` then uploading the contents of the created `_site` file to the webhost's file system in the correct directory.
+
+# Optional: Custom Domain and Email
+## Register a Domain
+Using a domain registrar (I have used godaddy and bluehost but it doesn't really matter provided they are reputable) purchase a domain name. (Names can appear more expensive through godaddy but they include the privacy protection on whois that bluehosts considers an addon)
+
+## Forward Domain to Github.io
+Using [github's instructions](https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site) and your registrar's specific directions on modifying the DNS listing we can setup the domain so when it is visited it re-directs to your github.io page. (Make sure you use the full webaddress you want use in the github settings custom domain section ie. www.\<optional_subdomain\>.\<domain\>.\<extentsion\>) On godaddy the DNS management options are buried but can be accessed via Account > My Products > Manage Domain > Additional Settings > Manage DNS > Records. Here I added a new CNAME record with name www and value \<github username\>.github.io. This means anyone visiting www.\<domain name\>.\<extension\> will be redirected to my github.io page. Setting this up on github allows the custom domain to mask the github.io address completely (Users will see your a url that is: \<custom domain name\>/\<content page\>, never exposing that it is hosted with github pages)
+
+## Forward Domain to Linode Instance
+As the linode instance has a static IP address we can create an A record to forward our custom domain to the instance. To do this add a new record select A as the type, add the name you would like to access the site on (@ for just the domain name) and as the value add the linode server's IP address. This might not work straight away - in my case .dev domains force https in several browsers and the LEMP linode image does not have this setup by default. To set this up we need to do two things; set up a certificate bot and open some ports in the firewall. Setting up certbot can be done by following the instructions [here](https://certbot.eff.org/lets-encrypt/debianstretch-nginx), you may need to restart your ssh session after installing certbot with snap. Finally we can open access to port 443 by entering the command `ufw allow 443`. Your website should now be served when you go the domain name that forwards to your linode instances IP address. (If you want to use the linode instance to serve multiple websites see the extension section on virtual hosts)
+
+## Setup Mail Forwarding
+1. If you have an existing personal email account you can use this, otherwise create a new gmail/outlook that you want to receive and send emails from.
+2.  Go to postale.io and enter the source and destination email addresses then click 'create domain email'. This will generate a mailbox and provide a series of entries that need to be added to your DNS settings back on the website you registered your domain with. For godaddy these can be added on the same page where we setup forwarding to our github.io page. (Account > My Products > Manage Domain > Additional Settings > Manage DNS > Records) postale.io has a final button at the bottom of the page which will check that your DNS settings are correct and the service is live - at this point it will also give you a username and password to log into their mail server.
+3.  Login to postale.io and goto the admin settings menu in the bottom left
+4.  Click show on the email account you just set up
+5.  Scroll down to Sieve filter > Change filter and click Redirect
+6.  Add the email address you want all the mail sent to your new email address to be received
+
+## Extensions
+### Linode LEMP Virtual Host Configuration
+One of the reasons you might want to use a linode server as a webhost instead of github pages is you want to have a few different websites that are managed independently and served when accessing different subdomains. For examples I might have my blog served when I goto blog.\<domain name\>.\<extension\> and a demo for a research project served when I access researchprojectname.\<domain name\>.\<extension\> and www.\<domain name\>.\<extension\> serves a research profile landing page. 
+#### Configure a New Virtual Host
+To achieve this we need to configure a virtual host in nginx for each website we want to be able ton serve. These virtual host configs are found in `/etc/nginx/sites-available/` nginx is initialised with a configured virtual host named `default`. Start by copying this configuration file then opening it in your terminal editor of choice. By adding a  `server name <sub domain name>;` field this virtual host will only respond to requests the are via the specified sub domain name. In addition to this we can modify the `root` field to another directory we can serve the contents of that directory when a request is made to the server name. This will allow us to have different websites in each root directory for each server name. 
+#### Updating nginx
+Now that the configuration file is setup we need to activate it in ngix. To do this we create a symbolic link from the configuration in `sites-available` to `sites-enabled` by entering the command `ln -s /etc/nginx/sites-available/\<config file\> /etc/nginx/sites-enabled/`. Now we refresh the nginx service by restarting it with `/etc/init.d/nginx restart`. This should enable the new virtual host which will be ready to serve root directory content on request.
